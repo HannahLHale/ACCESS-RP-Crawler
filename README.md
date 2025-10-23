@@ -22,12 +22,12 @@ rpCrawler/ <br>
 Run the Flask server:
 **python app.py**
 You should see output like:
-# Running on http://0.0.0.0:5000
+** Running on http://0.0.0.0:5000 **
 
 4. Open `index.html` in your browser. 
 - Use a local web server (recommended)
 **python -m http.server 8000**
-# Then open http://localhost:8000
+**Then open http://localhost:8000**
 
 5. Check Connection
 The interface should show "Server connected" with a green circle indicator. If it shows "Server not connected" message with a red circle indicator:
@@ -71,5 +71,6 @@ Optionally download the results as a CSV file
 - Stampede3
 
 - Voyager
+
 
 
