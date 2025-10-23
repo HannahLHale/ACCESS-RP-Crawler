@@ -13,7 +13,7 @@ Make sure you have Python 3.7+ installed, then install the required packages:
 
 2. File Structure
    
-rpCrawler/
+rpCrawler/ <br>
 ├── app.py                 
 ├── requirements.txt       
 ├── index.html            
@@ -72,3 +72,4 @@ Optionally download the results as a CSV file
 - Stampede3
 
 - Voyager
+
