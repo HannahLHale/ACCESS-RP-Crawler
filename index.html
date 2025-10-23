@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RP Documentation Web Crawling Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;}
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(46, 45, 144, 0.8);}
+        h1 {
+            text-align: center;
+            color: #1A5B6E;}
+        .section-header {
+            border-bottom: 2px solid #3BB5B3;
+            padding-bottom: 5px;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            color: #3498db;}
+        .status-bar {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #FFC42D;}
+        .status-indicator {
+            height: 12px;
+            width: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: 8px;}
+        .status-indicator.connected { background-color: #25a95c; }
+        .status-indicator.disconnected { background-color: #d62b18; }
+        .form-group {
+            margin-bottom: 15px; }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;}
+        button {
+            background-color:#00ACE6;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-right: 10px;}
+        button:hover:not(:disabled) {
+            background-color: #1A5B6E;}
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;}
+        .button-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;}
+        .button-row .left { flex: 0 1 auto; }
+        .button-row .right { flex: 0 0 auto; }
+        @media (max-width: 520px) {
+            .button-row { flex-direction: column; align-items: stretch; }
+            .button-row .right { margin-top: 8px; align-self: flex-end; }
+        }
+        .button-row .right button {
+            background-color: #bdc3c7; 
+            color: #ffffff;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .button-row .right button:hover:not(:disabled) {
+            background-color: #000000; 
+            color: #ffffff;
+        }
+        .button-row .right button i {
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        #rp-select{
+            width: 100%;
+            padding: 7px;
+            border: 1px solid #ccc;
+            border-radius: 15px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        #keywords{
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 15px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        #results-container {
+            margin-top: 20px;
+        }
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .result-table th, .result-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .result-table th {
+            background-color: #f2f2f2;
+            color: #555;
+        }
+        .message-box {
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            background-color: #f39c12;
+            color: white;
+            display: none;
+        }
+        .known-issue {
+            color: #b03a2e;
+            margin-top: 12px;
+            font-size: 1rem;
+            text-align: center;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+<div class="container">
+    <h1>RP Documentation Web Crawler</h1>
+    <div class="status-bar">
+        <span>🗄️Server Status: <span id="server-status-text">Checking...</span></span>
+        <span class="status-indicator" id="server-status-indicator"></span>
+    </div>
+    <h2 class="known-issue">Known Issue: CloudBank is not being crawled correctly.</h2>
+    <div id="message-box" class="message-box"></div>
+    <h2 class="section-header">1. Crawl Documentation</h2>
+    <div class="form-group">
+        <label for="rp-select">Select Resource Provider (RP):</label>
+        <select id="rp-select">
+            <option value="">Loading RPs...</option>
+        </select>
+    </div>
+        <div class="button-row">
+            <div class="left">
+                <button id="start-crawl-btn" onclick="startCrawl()">Start Crawling</button>
+            </div>
+            <div class="right">
+                <button id="download-urls-btn" onclick="downloadCSV('urls')" disabled><i class="fas fa-download"></i> Download Crawled URLs (CSV)</button>
+            </div>
+        </div>
+    <div id="crawl-status" style="margin-top: 15px;"></div>
+    <h2 class="section-header">2. Search for Keywords</h2>
+    <div class="form-group">
+        <label for="keywords">Enter Keywords (one per line):</label>
+        <textarea id="keywords" rows="5" placeholder="example:&#10;cite&#10;password&#10;OpenOnDemand" disabled></textarea>
+    </div>
+    <div class = "button-row">
+        <div class = "left">
+            <button id="search-btn" onclick="searchKeywords()" disabled>Search Keywords</button>
+        </div>
+        <div class="right">
+            <button id="download-results-btn" onclick="downloadCSV('results')" disabled><i class="fas fa-download"></i>Download Search Results (CSV) </button>
+        </div>
+    </div>
+    <div id="results-container">
+        <div id="search-status" style="margin-top: 15px;"></div>
+        <table id="search-results-table" class="result-table" style="display: none;">
+            <thead>
+                <tr>
+                    <th>URLs with Keywords</th>
+                    <th>Keywords Found</th>
+                </tr>
+            </thead>
+            <tbody id="search-results-body">
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    const API_BASE = 'http://127.0.0.1:5000/api';
+    let crawledUrls = [];
+    let searchResults = [];
+
+    function showMessage(text, isError = false) {
+        const box = document.getElementById('message-box');
+        box.textContent = text;
+        box.style.backgroundColor = isError ? '#e74c3c' : '#2ecc71';
+        box.style.display = 'block';
+        setTimeout(() => box.style.display = 'none', 5000);}
+
+    function toggleButton(id, enable) {
+        document.getElementById(id).disabled = !enable;}
+
+    function checkServerHealth() {
+        fetch(`${API_BASE}/health`)
+            .then(response => {
+                if (!response.ok) throw new Error('Server returned non-200 status');
+                document.getElementById('server-status-text').textContent = 'Connected';
+                document.getElementById('server-status-indicator').className = 'status-indicator connected';
+                loadRPList();
+                toggleButton('start-crawl-btn', true);
+                document.getElementById('keywords').disabled = false;})
+            .catch(error => {
+                console.error('Health check failed:', error);
+                document.getElementById('server-status-text').textContent = 'Disconnected';
+                document.getElementById('server-status-indicator').className = 'status-indicator disconnected';
+                showMessage("Server not connected. Make sure app.py is running on port 5000.", true);
+                toggleButton('start-crawl-btn', false);
+                document.getElementById('keywords').disabled = true;});
+    }
+    function loadRPList() {
+        fetch(`${API_BASE}/rp-list`)
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to fetch RP list');
+                return response.json();
+            })
+            .then(data => {
+                console.log('Loaded RP list', data);
+                const select = document.getElementById('rp-select');
+                select.innerHTML = '';
+                data.rps.forEach(rp => {
+                    const option = document.createElement('option');
+                    option.value = rp;
+                    option.textContent = rp.charAt(0).toUpperCase() + rp.slice(1);
+                    select.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Failed to load RP list:', error);
+                showMessage('Could not load RP list from server.', true);
+            });
+    }
+    function startCrawl() {
+        const rpName = document.getElementById('rp-select').value;
+        const rpCaps=rpName.charAt(0).toUpperCase() + rpName.slice(1);
+        const maxPages = 700; // fixed default per user request
+        const statusDiv = document.getElementById('crawl-status');
+        console.log('startCrawl clicked', { rpName, maxPages });
+        statusDiv.textContent = `Starting crawl for ${rpCaps} (max pages: ${maxPages})...`;
+        if (!rpName) {
+            showMessage('Please select a Resource Provider Site to Crawl.', true);
+            return;
+        }
+        statusDiv.innerHTML = `Status: Crawling ${rpCaps}... \n(Please Wait. This may take a few minutes.)`;
+        toggleButton('start-crawl-btn', false);
+        toggleButton('search-btn', false);
+        toggleButton('download-urls-btn', false);
+        toggleButton('download-results-btn', false);
+        crawledUrls = [];
+        searchResults = [];
+        document.getElementById('search-results-body').innerHTML = '';
+        document.getElementById('search-results-table').style.display = 'none';
+        document.getElementById('search-status').textContent = '';
+        fetch(`${API_BASE}/crawl`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ rp_name: rpName, max_pages: maxPages }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            toggleButton('start-crawl-btn', true);
+            if (data.success) {
+                crawledUrls = data.urls;
+                rpProp=data.rp_name.charAt(0).toUpperCase() + data.rp_name.slice(1);
+                statusDiv.innerHTML = `Crawl Complete! ${rpProp}: Found ${data.count} user documentation URLs.`;
+                showMessage('Crawling finished successfully.', false);
+                toggleButton('search-btn', true);
+                toggleButton('download-urls-btn', true);
+            } else {
+                statusDiv.innerHTML = `Crawl Failed: ${data.error}`;
+                showMessage(`Crawl failed: ${data.error}`, true);
+            }
+        })
+        .catch(error => {
+            toggleButton('start-crawl-btn', true);
+            statusDiv.innerHTML = `Crawl Error: Could not connect to the API.`;
+            showMessage('Network error during crawl.', true);
+            console.error('Error during crawl:', error);
+        });
+    }
+    function searchKeywords() {
+        const keywordText = document.getElementById('keywords').value.trim();
+        const keywords = keywordText.split('\n').map(k => k.trim()).filter(k => k.length > 0);
+        const statusDiv = document.getElementById('search-status');
+        if (crawledUrls.length === 0) {
+            showMessage('Please crawl a site first.', true);
+            return;
+        }
+        if (keywords.length === 0) {
+            showMessage('Please enter at least one keyword.', true);
+            return;
+        }
+        statusDiv.innerHTML = `Status: Searching ${crawledUrls.length} URLs for ${keywords.length} keywords...\n (Please Wait. This may take a few minutes.)`;
+        toggleButton('search-btn', false);
+        toggleButton('download-results-btn', false);
+        document.getElementById('search-results-body').innerHTML = ''; 
+        fetch(`${API_BASE}/search`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ urls: crawledUrls, keywords: keywords }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            toggleButton('search-btn', true);
+            if (data.success) {
+                searchResults = data.results;
+                displaySearchResults(data.results);
+                statusDiv.innerHTML = `Search Complete! Found keywords in ${data.count} pages of ${data.rp_name} user documentation.`;
+                showMessage('Search finished successfully.', false);
+                toggleButton('download-results-btn', true);
+            } else {
+                statusDiv.innerHTML = `Search Failed: ${data.error}`;
+                showMessage(`Search failed: ${data.error}`, true);
+            }
+        })
+        .catch(error => {
+            toggleButton('search-btn', true);
+            statusDiv.innerHTML = `Search Error: Could not connect to the API.`;
+            showMessage('Network error during search.', true);
+            console.error('Error during search:', error);
+        });
+    }
+    function displaySearchResults(results) {
+        const tbody = document.getElementById('search-results-body');
+        const table = document.getElementById('search-results-table');
+        tbody.innerHTML = '';
+        if (results.length > 0) {
+            table.style.display = 'table';
+            results.forEach(item => {
+                const row = tbody.insertRow();
+                const urlCell = row.insertCell();
+                const keywordCell = row.insertCell();
+                urlCell.innerHTML = `<a href="${item.url}" target="_blank">${item.url}</a>`;
+                keywordCell.textContent = item.keywords.join(', ');
+            });
+        } else {
+            table.style.display = 'none';
+        }
+    }
+    function downloadCSV(type) {
+        let csvContent = "data:text/csv;charset=utf-8,";
+        let filename = 'data.csv';
+
+        if (type === 'urls') {
+            filename = 'crawled_urls.csv';
+            csvContent += "URL\n" + crawledUrls.join('\n');
+        } else if (type === 'results') {
+            filename = 'search_results.csv';
+            csvContent += "URL,Keywords Found\n";
+            searchResults.forEach(item => {
+                // Escape quotes and ensure keywords are in one cell
+                const keywords = `"${item.keywords.join(', ').replace(/"/g, '""')}"`;
+                csvContent += `${item.url},${keywords}\n`;
+            });
+        } else {
+            return;
+        }
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", filename);
+        document.body.appendChild(link); 
+        link.click();
+        document.body.removeChild(link);
+    }
+    window.onload = checkServerHealth;
+</script>
+</body>
+</html>
