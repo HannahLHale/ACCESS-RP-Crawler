@@ -22,7 +22,7 @@ rpCrawler/ <br>
 Run the Flask server:
 **python app.py**
 You should see output like:
-** Running on http://0.0.0.0:5000 **
+**Running on http://0.0.0.0:5000**
 
 4. Open `index.html` in your browser. 
 - Use a local web server (recommended)
@@ -71,6 +71,7 @@ Optionally download the results as a CSV file
 - Stampede3
 
 - Voyager
+
 
 
 
