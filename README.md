@@ -12,12 +12,13 @@ Make sure you have Python 3.7+ installed, then install the required packages:
 **pip install -r requirements.txt**
 
 2. File Structure
+   
 rpCrawler/
 ├── app.py                 
 ├── requirements.txt       
 ├── index.html            
 └── README.md             
-3. Start backend server
+4. Start backend server
 Run the Flask server:
 **python app.py**
 You should see output like:
@@ -69,4 +70,5 @@ Optionally download the results as a CSV file
 - REPACSS
 - Sage
 - Stampede3
+
 - Voyager
