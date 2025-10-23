@@ -11,7 +11,7 @@ SETUP
 Make sure you have Python 3.7+ installed, then install the required packages:
 ```pip install -r requirements.txt```
 
-3. File Structure
+3. File Structure <br>
 rpCrawler/ <br>
 ├── app.py                 
 ├── requirements.txt       
@@ -71,6 +71,7 @@ Optionally download the results as a CSV file
 - Stampede3
 
 - Voyager
+
 
 
 
