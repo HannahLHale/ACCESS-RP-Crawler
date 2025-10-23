@@ -12,20 +12,19 @@ Make sure you have Python 3.7+ installed, then install the required packages:
 **pip install -r requirements.txt**
 
 2. File Structure
-   
 rpCrawler/ <br>
 ├── app.py                 
 ├── requirements.txt       
 ├── index.html            
 └── README.md             
+
 4. Start backend server
 Run the Flask server:
 **python app.py**
 You should see output like:
 # Running on http://0.0.0.0:5000
 
-4. 
-Open `index.html` in your browser. 
+4. Open `index.html` in your browser. 
 - Use a local web server (recommended)
 **python -m http.server 8000**
 # Then open http://localhost:8000
@@ -72,4 +71,5 @@ Optionally download the results as a CSV file
 - Stampede3
 
 - Voyager
+
 
